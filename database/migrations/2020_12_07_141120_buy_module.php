@@ -157,16 +157,14 @@ class BuyModule extends Migration
         });
         Schema::create('orderAfter',function(Blueprint $table){
             $table->id();
-            $table->string('');
-        });
-        Schema::create("orderRefund",function(Blueprint $table) {
-            $table->id();
-            $table->string("orderSn");
-            $table->string("detail");
-            $table->tinyInteger("type")->comment('退款');
-            $table->decimal("actualAmount");
-            $table->decimal("refundAmount");
-            $table->tinyInteger("status");
+            $table->string('orderSn')->comment('订单编号');
+            $table->tinyInteger("afterType")->comment("类型")->default(0);
+            $table->tinyInteger("isShip")->comment("是否收到货")->default(0);
+            $table->tinyInteger("afterReason")->comment("退款原因")->default(0);
+            $table->decimal("refundAmount")->comment("退款金额")->default(0);
+            $table->decimal("actualAmount")->comment("订单实付金额")->default(0);
+            $table->text("refundDescription")->comment('退款描述')->nullable();
+            $table->text("picture")->nullable();
             $table->timestamps();
         });
     }

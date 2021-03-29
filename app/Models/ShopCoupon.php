@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * Class ShopCoupon
  * @package App\Models
  * @mixin Eloquent
+ * @property integer $id
  */
 class ShopCoupon extends Model
 {

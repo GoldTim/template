@@ -9,6 +9,13 @@ use Illuminate\Database\Eloquent\Model;
  * Class ShipInfo
  * @package App\Models
  * @mixin \Eloquent
+ * @property integer $id
+ * @property string $name
+ * @property string $address
+ * @property string $sendTime
+ * @property integer $type
+ * @property integer $chargingType
+ * @property integer $isFree
  */
 class ShipInfo extends Model
 {

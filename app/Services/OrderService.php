@@ -8,6 +8,7 @@ use App\Helpers\WeChat;
 use App\Helpers\Cart;
 use App\Helpers\Order as OrderHelper;
 use App\Models\Order;
+use App\Models\OrderAfter;
 use App\Models\OrderDetail;
 use App\Models\ShipTerm;
 use App\Models\ShipDetail;
@@ -276,10 +277,41 @@ class OrderService extends BaseService
      * 订单售后
      * @param $uId
      * @param $data
+     * @throws Exception
+     * @return array
      */
     public function afterOrder($uId,$data)
     {
+        $data = [
+            "orderSn" => "",
+            "afterType" => "",//仅退款,退款退货,换货
+            "shipStatus" => "",
+            "afterReason" => "",//售后原因
+            "refundAmount" => "",
+            "refundDescription" => "",
+            "picture" => []
+        ];
 
+
+        $throwArray = [
+            "未支付", "退款中"
+        ];
+        if (!$order = Order::where([
+            "orderSn" => $data['orderSn'],
+            'uId' => $data['uId']
+        ])) throw new Exception("订单不存在");
+        if (Carbon::now()->diffInDays(Carbon::parse($order->created_at)) > 30) throw new Exception("超过售后时间");
+        if (!OrderAfter::create([
+            "orderSn" => $order->orderSn,
+            "afterType" => $data['afterType'],
+            "isShip" => $data['isShip'],
+            "afterReason" => $data['afterReason'],
+            "refundAmount" => $data['refundAmount'],
+            "actualAmount" => $order->actualAmount,
+            "refundDescription" => $data['refundDescription'],
+            "picture" => $data['picture']
+        ])) throw new Exception("提交申请失败");
+        return [];
     }
 
     /**
@@ -323,10 +355,12 @@ class OrderService extends BaseService
      * @return array
      * @throws Exception
      */
-    public function confirmOrder($uId,$orderSn){
-        if (!$order = Order::where('orderSn', $orderSn)->where('uId', $uId)->first()) throw new Exception("订单不存在");
-        if (!$order->update([
-            'status' => array_search('已完成', config('params.orderStatus'))
+    public function confirmOrder($uId,$orderSn)
+    {
+        $order = new OrderHelper();
+        if (!$order->confirm([
+            "orderSn" => $orderSn,
+            "customer" => $uId
         ])) throw new Exception("确认订单失败");
         return [];
     }

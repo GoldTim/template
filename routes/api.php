@@ -47,7 +47,7 @@ Route::prefix('order')->group(function() {
     Route::get('detail/{orderSn}', [OrderController::class, 'detailOrder']);//订单详情
     Route::get('cancel/{orderSn}', [OrderController::class, 'cancelOrder']);//取消订单
     Route::post('list', [OrderController::class, 'listOrder']);//订单列表
-    Route::get('confirm/{orderSn}', [OrderController::class, 'confirmOrder']);
+    Route::get('confirm/{orderSn}', [OrderController::class, 'confirmOrder']);//确认订单
     Route::delete('delete/{orderSn}', [OrderController::class, 'delOrder']);
     Route::post('pay', [OrderController::class, 'payOrder']);
 //    });

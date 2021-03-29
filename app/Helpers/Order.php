@@ -68,10 +68,16 @@ class Order
         ];
     }
 
+    /**
+     * 订单确认收货
+     * @param $data
+     * @return array
+     * @throws Exception
+     */
     public function confirm($data)
     {
         $order = $this->setOrder($data);
-
+        return $this->updateOrderStatus($order,"已完成");
     }
 
     public function Refund($data)

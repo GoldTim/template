@@ -10,6 +10,20 @@ use Illuminate\Database\Eloquent\Model;
  * Class UserAddress
  * @package App\Models
  * @mixin Eloquent
+ * @property string $lastName
+ * @property string $firstName
+ * @property string $contactEmail
+ * @property string $contactPhone
+ * @property string $country
+ * @property string $province
+ * @property string $city
+ * @property string $area
+ * @property string $company
+ * @property string $addressLine1
+ * @property string $addressLine2
+ * @property string $postCode
+ * @property integer $status
+ * @property integer $isDefault
  */
 class UserAddress extends Model
 {
