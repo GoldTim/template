@@ -4,15 +4,12 @@
 namespace App\Http\Controllers;
 use App\Services\OrderService;
 use Illuminate\Support\Facades\DB;
+use Mockery\Exception;
 
 class TestController
 {
     public function createOrder()
     {
-
-
-
-
         $data = [
             "shop"=>[
                 [
@@ -37,5 +34,21 @@ class TestController
             DB::rollBack();
             dd($exception->getMessage());
         }
+    }
+
+    public function test()
+    {
+        $order = new OrderService();
+        try {
+            $result = $order->payOrder(1, [
+                "orderSn" => "Msn2021040256524848",
+                "payMethod" => 5,
+                "code"=>"135205303866027988"
+            ]);
+            dd($result);
+        }catch (Exception$exception){
+            dd($exception->getMessage());
+        }
+
     }
 }

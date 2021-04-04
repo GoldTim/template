@@ -36,6 +36,8 @@ Route::prefix('order')->group(function() {
     Route::match(['post', 'get'], '', [OrderController::class, ''])->name('order.list');
     Route::get('detail/{orderSn}', [OrderController::class, ''])->name('');
     Route::post('createOrder',[OrderController::class,'createOrder'])->name('order.create');
+    Route::get('test',[TestController::class,'test']);
+
 });
 Route::prefix('cart')->group(function() {
     Route::get('list', [CartController::class, 'getList'])->name('cart.list');//购物车详情
@@ -47,7 +49,6 @@ Route::prefix('auth')->group(function(){
     Route::view('forget','');
     Route::post('login',[]);
 });
-Route::view('inertia','app');
 
 
 

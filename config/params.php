@@ -9,5 +9,5 @@ return [
     'couponStatus'  =>['待使用','已使用','已失效'],
     'orderStatus'   =>['未支付','已支付','已发货','已完成','仅退款','退款退货','取消订单','订单超时'],
     'orderAfterType'=>['退款','退款退货','换货'],
-    'payMethod'     =>['weChatNative','WeChatApp','weChatMweb','weChatJsApi','weChatProcedure','aliPayApp','aliPayNative']
+    'payMethod'     =>['weChatNative','WeChatApp','weChatMweb','weChatJsApi','weChatProcedure',"weChatMicroPay",'aliPayApp','aliPayNative',"aliPayPay"]
 ];

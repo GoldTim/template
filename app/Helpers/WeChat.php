@@ -8,17 +8,18 @@ use ReflectionException;
 use ReflectionMethod;
 
 class WeChat{
-    protected $appId;
-    protected $secret;
-    protected $mchId;
+    protected $appId="wx94cbfb86cef8ee5b";
+    protected $secret="955517946b3038975e8708350170c087";
+    protected $mchId="1520401631";
     protected $charset = "utf-8";
     protected $getAccessTokenUrl = "https://api.weixin.qq.com/sns/oauth2/access_token";
     protected $getOpenIdUrl = "https://api.weixin.qq.com/sns/jscode2session";
     protected $refundUrl='https://api.mch.weixin.qq.com/secapi/pay/refund';
     protected $enquiryUrl = "https://api.mch.weixin.qq.com/pay/orderquery";
     protected $createUrl="https://api.mch.weixin.qq.com/pay/unifiedorder";
+    protected $microPayUrl = "https://api.mch.weixin.qq.com/pay/micropay";
     protected $methodArray = [
-        "pay","view","refund","checkOrder"
+        "pay","view","refund","checkOrder","microPay"
     ];
 
     /*
@@ -48,21 +49,21 @@ class WeChat{
      * @throws Exception
      */
     private function getWeChatInfo($typeName){
-        if (!Schema::hasTable("system")) throw new Exception("获取系统微信信息失败");
-        if (!Schema::hasColumn("system", "weChatInfo")) throw new Exception("获取系统微信信息失败");
-        if (!$info = DB::table("system")->select("weChatInfo")->first()) throw new Exception("获取系统微信信息失败");
-        $weChatInfo = json_decode($info->weChatInfo,true);
-        $this->mchId = $weChatInfo['mchId'];
-        $this->appId = $weChatInfo['appId'];
-        $this->secret = $weChatInfo['secret'];
-        if ($typeName === 'Procedure') {
-            $this->appId = $weChatInfo['procedure'];
-            $this->secret = $weChatInfo['procedureSecret'];
-        } elseif ($typeName === 'Application') {
-            $this->appId = $weChatInfo['application'];
-        } elseif ($typeName === 'JsApi') {
-            $this->secret = $weChatInfo['pubSecret'];
-        }
+//        if (!Schema::hasTable("system")) throw new Exception("获取系统微信信息失败");
+//        if (!Schema::hasColumn("system", "weChatInfo")) throw new Exception("获取系统微信信息失败");
+//        if (!$info = DB::table("system")->select("weChatInfo")->first()) throw new Exception("获取系统微信信息失败");
+//        $weChatInfo = json_decode($info->weChatInfo,true);
+//        $this->mchId = $weChatInfo['mchId'];
+//        $this->appId = $weChatInfo['appId'];
+//        $this->secret = $weChatInfo['secret'];
+//        if ($typeName === 'Procedure') {
+//            $this->appId = $weChatInfo['procedure'];
+//            $this->secret = $weChatInfo['procedureSecret'];
+//        } elseif ($typeName === 'Application') {
+//            $this->appId = $weChatInfo['application'];
+//        } elseif ($typeName === 'JsApi') {
+//            $this->secret = $weChatInfo['pubSecret'];
+//        }
     }
 
     private function Pay($mainArray)
@@ -80,7 +81,6 @@ class WeChat{
             "limit_pay" => "no_credit",
             "trade_type" => $mainArray['trade_type']
         ];
-//        dd(date("YmdHis", time() + 1800));
         $params = array_merge($params, $mainArray);
         $params['sign'] = $this->makeSign($params);
         $result = sendRequest($this->createUrl, "POST", ["body" => arrayToXml($params)], ["Content-Type" => "application/xml"]);
@@ -88,6 +88,62 @@ class WeChat{
         $xmlResult = xmlToCollection($result['result'])->toArray();
         if ($xmlResult['return_code'] === 'FAIL' || $xmlResult['return_code'] !== 'SUCCESS' || $xmlResult['return_msg'] !== 'OK') throw new Exception($xmlResult['return_msg']);//发起支付失败
         return $xmlResult;
+    }
+
+    private function microPay($mainArray)
+    {
+        $params = [
+            "appid" => $this->appId,
+            "mch_id" => $this->mchId,
+            "nonce_str" => Str::random(32),
+            "sign_type" => "MD5",
+            "fee_type" => "CNY",
+            "spbill_create_ip" => $_SERVER['REMOTE_ADDR'],
+            "time_start" => date("YmdHis"),
+            "time_expire" => date("YmdHis", time() + 1800),
+            "limit_pay" => "no_credit",
+        ];
+        $params = array_merge($params, $mainArray);
+        $params['sign'] = $this->makeSign($params);
+        $result = getRequest($this->microPayUrl, "POST", ["body" => arrayToXml($params)], ["Content-Type" => "application/xml"]);
+        $result = xmlToCollection($result)->toArray();
+        if (!isset($result['return_code'])||($result['return_code'] !== "SUCCESS" || $result["return_msg"] !== "OK")) {dd($result);}
+        //throw new Exception("请求失败");
+
+        if ($result['result_code'] === 'FAIL') {
+            if (in_array($result['err_code'], ["AUTHCODEEXPIRE", "NOTENOUGH", "NOTSUPORTCARD", "SYSTEMERROR", "BANKERROR", "USERPAYING"])) {
+                $throwArray = [
+                    "AUTHCODEEXPIRE" => "二维码已过期请刷新二维码",
+                    "NOTENOUGH" => "余额不足",
+                    "NOTSUPORTCARD" => "该卡不支持当前支付",
+                    "SYSTEMERROR" => "接口返回错误",
+                    "BANKERROR" => "银行系统异常",
+                    "USERPAYING" => "请用户输入密码"
+                ];
+                $bool = false;
+                if (in_array($result['err_code'], ["SYSTEMERROR", "BANKERROR", "USERPAYING"])) {
+                    sleep(5);
+                    if (!$orderStatus = $this->View(["orderNum" => $mainArray['out_trade_no']])) $bool = true;
+                }
+                if (!$bool) $this->Reverse($mainArray['out_trade_no']);
+            }
+
+            if ($result['err_code'] === "AUTHCODEEXPIRE") throw new Exception("二维码已过期请刷新二维码");//二维码过期
+            if ($result['err_code'] === "NOTENOUGH") throw new Exception("余额不足");//余额不足
+            if ($result['err_code'] === "NOTSUPORTCARD") throw new Exception("");//该卡不支持当前支付
+
+            if (in_array($result['err_code'], ["SYSTEMERROR", "BANKERROR", "USERPAYING"])) {
+                sleep(5);
+                if (!$orderStatus = $this->View(["orderNum" => $mainArray['out_trade_no']])) {
+                    $this->Reverse($mainArray['out_trade_no']);
+                    throw new Exception("支付失败");
+                }
+            }
+            /**
+             * 进入轮询
+             */
+        }
+        return $result;
     }
 
     private function View($mainArray)
@@ -99,10 +155,23 @@ class WeChat{
             "nonce_str" => md5("checkOrder" . time())
         ];
         $params['sign'] = $this->makeSign($params);
-        $result = getRequest($this->enquiryUrl, "post", [
+        $result = getRequest($this->enquiryUrl, "POST", [
             "body" => arrayToXml($params)
         ], ["headers" => ["Content-Type" => "application/xml"]]);
+        dd($result);
         return $result['trade_state'] !== "SUCCESS" ? false : true;
+    }
+
+    private function Reverse($orderSn)
+    {
+        $params = [
+            "appid"=>$this->appId,
+            "mch_id"=>$this->mchId,
+            "out_trade_no"=>$orderSn,
+            "nonce_str"=>md5("Reverse".time()),
+        ];
+        $params['sign'] = $this->makeSign($params);
+        $result = getRequest($this->reverseUrl,"POST",["body"=>arrayToXml($params)],["headers"=>["Content-Type"=>"application/xml"]]);
     }
 
     private function Refund($mainArray)

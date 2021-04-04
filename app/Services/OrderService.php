@@ -234,6 +234,7 @@ class OrderService extends BaseService
         }
         if (!$orderList = Order::where($search)->get()) throw new Exception("订单不存在");
         if (!$payResult['payName'] = config('params.payMethod.' . $data['payMethod'])) throw new Exception("支付方式不存在");
+        if(isset($data['code']))$payResult['code']=$data['code'];
         $payResult = array_merge($payResult, [
             'orderSn' => isset($search['paySn']) ? $search['paySn'] : $search['orderSn'],
             'orderName' => isset($search['paySn']) ? '合并订单支付' : $orderList->first()->orderName,

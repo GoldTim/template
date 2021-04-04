@@ -333,6 +333,22 @@ class Order
         return $result;
     }
 
+    private function payByWeChatMicroPay($data)
+    {
+        $orderData = [
+            "body" => !empty($data['orderName']) ? $data['orderName'] : $data['orderSn'],
+            "out_trade_no" => $data['orderSn'],
+            "total_fee" => env("APP_ENV") == 'production' ? $data['actualAmount'] * 100 : 1,
+            "auth_code"=>$data['code']
+        ];
+        $weChat = new WeChat("microPay");
+        $weResult = $weChat->Implement([
+            "type"=>"microPay",
+            "data"=>$orderData
+        ]);
+        dd($weResult);
+    }
+
     /**
      * 支付宝
      * @param $data
@@ -374,6 +390,25 @@ class Order
                 "notify_url" => ""
             ]
         ];
+    }
+
+    private function payByAliPayPay($data)
+    {
+        $params = [
+            "capitalJson" => collect([
+                "out_trade_no" => $data['orderSn'],
+                "scene" => "bar_code",
+                "auth_code" => $data['code'],
+                "subject" => !empty($data['orderName']) ? $data['orderName'] : $data['orderSn'],
+                "total_amount" => env('APP_ENV') == 'production' ? $data['actualAmount'] : 0.01,
+                "timeout_express" => "15m",
+            ])->toJson(),
+            "method" => "alipay.trade.pay",
+            "mainArray" => [
+                "notify_url"
+            ]
+        ];
+        return AliPay::Implement("pay", $params);
     }
 
     /**

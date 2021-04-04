@@ -168,9 +168,11 @@ if(!function_exists('getRequest')){
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-
+        if($method=="POST") {
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl,CURLOPT_POSTFIELDS,$main);
+        }
         $data = curl_exec($curl);
-        if (curl_error($curl)) return false;
         return $data;
     }
 }

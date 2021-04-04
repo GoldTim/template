@@ -5,9 +5,9 @@ use ReflectionException;
 use ReflectionMethod;
 
 class AliPay{
-    private static $appId;//应用ID
+    private static $appId="2018121362561267";//应用ID
     private static $rsaPrivateKeyFilePath;//私钥文件路径
-    private static $privateKey;//私钥值
+    private static $privateKey="MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDROJRhbGHzoUEO7Vt5vPm6rrxaPAJb7TfxRzjRoLagaEvJi1Lrb28p6QBOqV4WL/C/oA79hL1F7h+amptwlE+GPE8jLyf5EHQ+c4da3grQr+d7trXPsQq3lpWcf5EYFGbW8sY1YBYE2/InvCjouM/2BBwxFvNH/gQIkz4zH0hWdjMt2MFvpZ25ofUhjx5n8Fv/aFcgsINUPzU2KTUZFAX809ODYMOtxfgt8ew1cPsPtClHNLLuHzjAAH+eS9FEtoIo2JE9ahbTdvgNBHhk4BxjO08ZZ7X+BDlYPaeVts7Iy8uNBTt5wikzOUhYDSvGOjPChVFMjxn/QfpfK/+vlKfxAgMBAAECggEANRvjrodQpgN8/EkMO27ZBaZtcYpiHuusk7a8mZnuQfG3q0WOmu0CjuTyiwU7OO6ackozA++6DBJSO3CbnIxJU43jmM7TmsmueFvjNBHBNRAx9pl+tWX/jnLPL5bCQhaLtGyUG+B0Nm+OnL+KsuiXAaAxd9SXlOLKK1MVKuz589g/N2C/I8yPZjhowJVFbLXvGXV3twoFSQ+DRp29YRqkNsUf2JIL22k1UQ/TJRjOxvTCQbnI115O2H56+9I1aWJ0Lcwc14diZ/eovOT1dUIf92StGYmZ3xiBbCizl582ZFazqvia7jty83DB9xqeUeAjLNdsieU3eH5skIQzy24tcQKBgQD/11gPuMRSpzcELiElG5PxxQHlx/TaJkcWIw199yCsVrNK3TTjg7nvBbmDB+/Z3K//7LZ/j5h+KS+ynyuwMtg2qfTIEwW0x1VVXRrGeJldPqp3ZkMXqqF/+rKRNIpzsnOlQNJnXC8ORR+40TNH1ZNa4+QRvjtuzKArBDFuyJHxhwKBgQDRWdPAmhPnAU8SyjglN4Eahqfq2E5mGcR5GCPXKHmT20nbeUUbHB6dGKE7nTlsDTrNWszTg1klN8HKMPcdoQsU5OEJbsY5EBm+7nyGXuUatfHXyfAPonHrdaO2ab9gJD0Q6bWJ1rCxsOuey0oUf3qiv9AxMZnBwvH/YhtuQOjYxwKBgQClmAm8q1gPM4Itp3n2ncIFhAF1bBY0uP/b+TY7aSBxy/BirYkVFebcKfVoNVPuzKPyX5HEQPpv9lKUJ+hMNKyzvQ/eDEnuN/MovImfGuIRc4U8oSkeAWhlAKxhxgMzXbbyqGFHW2htsRoWMvohLcEh3E17moi3b6TgEue4EAQ+swKBgEV6YFJNUEmcH5gG0LdZQlmBUv0XqH0uFAx0PIDNh/vQDSTvjEXBAU/1upzEQyhfA6LffZa8wrsdVA08TubgaYMXqq+sudB6TXEWSPF3UOWaeJa7CBbIPLJ+KkUBt2e63yFbzsneHGn8Y1Yh9YX0AMk+i2OoKHUrs5CkCKKAnEZFAoGAC4fjIkrvCO2cStTQjhIr1gPFBdRctT/3iH6EGUBmIDZc4yz6qDvIsyLhLbaakLjSl9or9MlIaOpCSYBb0jZsKSgthkyiSoye/1C1hJQKPHt7Q+o6BWxBbEY+ZcZ1IBb0zB+vrzN9Z6RWjB8N5DwQ2/lGa1cWRRHsjafcn/+OU3Y=";//私钥值
     private static $gatewayUrl = 'https://openapi.alipay.com/gateway.do';//网关
     private static $format = "JSON";//返回数据格式
     private static $apiVersion = "1.0";
