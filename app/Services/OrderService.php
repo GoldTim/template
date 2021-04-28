@@ -10,6 +10,7 @@ use App\Helpers\Order as OrderHelper;
 use App\Models\Order;
 use App\Models\OrderAfter;
 use App\Models\OrderDetail;
+use App\Models\OrderMaster;
 use App\Models\ShipTerm;
 use App\Models\ShipDetail;
 use App\Models\ShipInfo;
@@ -70,7 +71,6 @@ class OrderService extends BaseService
                     if ($skuList->count() < 1) throw new Exception("获取产品规格失败");
                     if ($skuList->count() > 1) throw new Exception("产品规格过多");
                     $sku = $skuList->first();
-
                     $p = array_merge($p, [
                         "amount" => $sku['skuAmount'],
                         "tAmount" => $sku['skuAmount'] * $value['skuNum'],
@@ -234,14 +234,37 @@ class OrderService extends BaseService
         }
         if (!$orderList = Order::where($search)->get()) throw new Exception("订单不存在");
         if (!$payResult['payName'] = config('params.payMethod.' . $data['payMethod'])) throw new Exception("支付方式不存在");
-        if(isset($data['code']))$payResult['code']=$data['code'];
+
+        $orderHelper = new OrderHelper();
+        if (!empty($orderList->first()['payMethod'])) {
+            $oldOrder = $orderList->first();
+            if ($viewResult = $orderHelper->checkOrder(['orderSn' => $oldOrder->orderSn])) throw new Exception("订单已支付");
+            if (isset($search['paySn'])) {
+                $orderMaster = OrderMaster::where('orderMsn', $search['paySn'])->first();
+                if (!$orderMaster->update([
+                    "orderMsn" => ""
+                ])) throw new Exception("");//支付单号
+                if (!Order::where('paySn', $search['paySn'])->update([
+                    "paySn" => $orderMaster->orderMsn,
+                ])) throw new Exception("");//修改支付单号
+            } else {
+                if (!Order::where('orderSn', $search['orderSn'])->update([
+                    "paySn" => ""
+                ])) throw new Exception("");//修改支付单号
+            }
+        }
+        foreach ($orderList as $item) {
+            if (!Order::where('orderSn', $item->orderSn)->update([
+                "payMethod" => $data['payMethod']
+            ])) throw new Exception("修改支付方式失败");
+        }
+        if (isset($data['code'])) $payResult['code'] = $data['code'];
         $payResult = array_merge($payResult, [
             'orderSn' => isset($search['paySn']) ? $search['paySn'] : $search['orderSn'],
             'orderName' => isset($search['paySn']) ? '合并订单支付' : $orderList->first()->orderName,
             'actualAmount' => $orderList->sum('actualAmount'),
             'notifyUrl' => 'test/ckWeChat'
         ]);
-        $orderHelper = new OrderHelper();
         return $orderHelper->Pay($payResult);
     }
 
@@ -292,8 +315,6 @@ class OrderService extends BaseService
             "refundDescription" => "",
             "picture" => []
         ];
-
-
         $throwArray = [
             "未支付", "退款中"
         ];

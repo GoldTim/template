@@ -15,8 +15,18 @@
         </style>
     </head>
     <body class="antialiased">
-
-    <label for="input"></label><input id="input" style="width: 100%;">
+    <form method="post" action="/order/pay" id="form">
+        {!! csrf_field() !!}
+        <input type="hidden" name="orderSn" value="Msn2021040610098102"/>
+        <input type="hidden" name="payMethod" value="8"/>
+        <label for="input"></label>
+        <input id="input" name="code">
+    </form>
     </body>
 <script src="{{mix("js/app.js")}}"></script>
+<script>
+    document.getElementById('input').onchange=function () {
+        document.getElementById('form').submit();
+    }
+</script>
 </html>

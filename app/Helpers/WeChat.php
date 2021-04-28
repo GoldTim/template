@@ -1,6 +1,7 @@
 <?php
 namespace App\Helpers;
 use Exception;
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -49,21 +50,21 @@ class WeChat{
      * @throws Exception
      */
     private function getWeChatInfo($typeName){
-//        if (!Schema::hasTable("system")) throw new Exception("获取系统微信信息失败");
-//        if (!Schema::hasColumn("system", "weChatInfo")) throw new Exception("获取系统微信信息失败");
-//        if (!$info = DB::table("system")->select("weChatInfo")->first()) throw new Exception("获取系统微信信息失败");
-//        $weChatInfo = json_decode($info->weChatInfo,true);
-//        $this->mchId = $weChatInfo['mchId'];
-//        $this->appId = $weChatInfo['appId'];
-//        $this->secret = $weChatInfo['secret'];
-//        if ($typeName === 'Procedure') {
-//            $this->appId = $weChatInfo['procedure'];
-//            $this->secret = $weChatInfo['procedureSecret'];
-//        } elseif ($typeName === 'Application') {
-//            $this->appId = $weChatInfo['application'];
-//        } elseif ($typeName === 'JsApi') {
-//            $this->secret = $weChatInfo['pubSecret'];
-//        }
+        if (!Schema::hasTable("system")) throw new Exception("获取系统微信信息失败");
+        if (!Schema::hasColumn("system", "weChatInfo")) throw new Exception("获取系统微信信息失败");
+        if (!$info = DB::table("system")->select("weChatInfo")->first()) throw new Exception("获取系统微信信息失败");
+        $weChatInfo = json_decode($info->weChatInfo,true);
+        $this->mchId = $weChatInfo['mchId'];
+        $this->appId = $weChatInfo['appId'];
+        $this->secret = $weChatInfo['secret'];
+        if ($typeName === 'Procedure') {
+            $this->appId = $weChatInfo['procedure'];
+            $this->secret = $weChatInfo['procedureSecret'];
+        } elseif ($typeName === 'Application') {
+            $this->appId = $weChatInfo['application'];
+        } elseif ($typeName === 'JsApi') {
+            $this->secret = $weChatInfo['pubSecret'];
+        }
     }
 
     private function Pay($mainArray)
@@ -102,13 +103,17 @@ class WeChat{
             "time_start" => date("YmdHis"),
             "time_expire" => date("YmdHis", time() + 1800),
             "limit_pay" => "no_credit",
+            "attach"=>$mainArray['body']
         ];
         $params = array_merge($params, $mainArray);
         $params['sign'] = $this->makeSign($params);
-        $result = getRequest($this->microPayUrl, "POST", ["body" => arrayToXml($params)], ["Content-Type" => "application/xml"]);
-        $result = xmlToCollection($result)->toArray();
-        if (!isset($result['return_code'])||($result['return_code'] !== "SUCCESS" || $result["return_msg"] !== "OK")) {dd($result);}
-        //throw new Exception("请求失败");
+        $client = new Client();
+        $result = $client->post($this->microPayUrl,[
+            "headers"=>["Content-Type"=>"application/xml"],
+            "body"=>arrayToXml($params)
+        ]);
+//        $result = xmlToCollection($result->getBody()->getContents())->toArray();
+        $result = xmlToCollection($result->getBody()->getContents())->toArray();
 
         if ($result['result_code'] === 'FAIL') {
             if (in_array($result['err_code'], ["AUTHCODEEXPIRE", "NOTENOUGH", "NOTSUPORTCARD", "SYSTEMERROR", "BANKERROR", "USERPAYING"])) {
@@ -126,18 +131,6 @@ class WeChat{
                     if (!$orderStatus = $this->View(["orderNum" => $mainArray['out_trade_no']])) $bool = true;
                 }
                 if (!$bool) $this->Reverse($mainArray['out_trade_no']);
-            }
-
-            if ($result['err_code'] === "AUTHCODEEXPIRE") throw new Exception("二维码已过期请刷新二维码");//二维码过期
-            if ($result['err_code'] === "NOTENOUGH") throw new Exception("余额不足");//余额不足
-            if ($result['err_code'] === "NOTSUPORTCARD") throw new Exception("");//该卡不支持当前支付
-
-            if (in_array($result['err_code'], ["SYSTEMERROR", "BANKERROR", "USERPAYING"])) {
-                sleep(5);
-                if (!$orderStatus = $this->View(["orderNum" => $mainArray['out_trade_no']])) {
-                    $this->Reverse($mainArray['out_trade_no']);
-                    throw new Exception("支付失败");
-                }
             }
             /**
              * 进入轮询

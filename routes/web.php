@@ -34,8 +34,9 @@ Route::prefix('product')->group(function(){
 });
 Route::prefix('order')->group(function() {
     Route::match(['post', 'get'], '', [OrderController::class, ''])->name('order.list');
-    Route::get('detail/{orderSn}', [OrderController::class, ''])->name('');
+    Route::get('detail/{orderSn}', [OrderController::class, ''])->name('order.detail');
     Route::post('createOrder',[OrderController::class,'createOrder'])->name('order.create');
+    Route::post('pay',[OrderController::class,'payOrder'])->name('order.pay');
     Route::get('test',[TestController::class,'test']);
 
 });

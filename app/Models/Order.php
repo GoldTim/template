@@ -15,4 +15,10 @@ class Order extends Model
 {
     use HasFactory;
     protected $table="orderInfo";
+    protected $fillable=[""];
+
+    public function setPaySnAttribute($value)
+    {
+
+    }
 }

@@ -163,7 +163,7 @@ class OrderController extends Controller
     {
         DB::beginTransaction();
         try {
-            $result = $this->service->payOrder(auth('api')->id(),$this->getData('data'));
+            $result = $this->service->payOrder(1,request()->all());
             DB::commit();
             send_response($result);
         } catch (Exception $exception) {
