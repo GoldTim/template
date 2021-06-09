@@ -19,6 +19,9 @@ class WeChat{
     protected $enquiryUrl = "https://api.mch.weixin.qq.com/pay/orderquery";
     protected $createUrl="https://api.mch.weixin.qq.com/pay/unifiedorder";
     protected $microPayUrl = "https://api.mch.weixin.qq.com/pay/micropay";
+
+    protected $payOrderUrl = "https://api.mch.weixin.qq.com/v3/pay/transactions";
+
     protected $methodArray = [
         "pay","view","refund","checkOrder","microPay"
     ];
@@ -69,26 +72,41 @@ class WeChat{
 
     private function Pay($mainArray)
     {
+//        $params = [
+//            "appid" => $this->appId,
+//            "mch_id" => $this->mchId,
+//            "nonce_str" => Str::random(32),
+//            "sign_type" => "MD5",
+//            "fee_type" => "CNY",
+//            "spbill_create_ip" => $_SERVER['REMOTE_ADDR'],
+//            "time_start" => date("YmdHis"),
+//            "time_expire" => date("YmdHis", time() + 1800),
+//            "notify_url" => $mainArray['notify_url'],
+//            "limit_pay" => "no_credit",
+//            "trade_type" => $mainArray['trade_type']
+//        ];
+//        $params = array_merge($params, $mainArray);
+//        $params['sign'] = $this->makeSign($params);
+//        $result = sendRequest($this->createUrl, "POST", ["body" => arrayToXml($params)], ["Content-Type" => "application/xml"]);
+//        if ($result['status'] !== true || $result['message'] !== 'SUCCESS') throw new Exception("发送请求失败");//发送请求失败
+//        $xmlResult = xmlToCollection($result['result'])->toArray();
+//        if ($xmlResult['return_code'] === 'FAIL' || $xmlResult['return_code'] !== 'SUCCESS' || $xmlResult['return_msg'] !== 'OK') throw new Exception($xmlResult['return_msg']);//发起支付失败
+//        return $xmlResult;
         $params = [
             "appid" => $this->appId,
-            "mch_id" => $this->mchId,
-            "nonce_str" => Str::random(32),
-            "sign_type" => "MD5",
-            "fee_type" => "CNY",
-            "spbill_create_ip" => $_SERVER['REMOTE_ADDR'],
-            "time_start" => date("YmdHis"),
+            "mchid" => $this->mchId,
+            "out_trade_no" => $mainArray['out_trade_no'],
+            "description" => $mainArray['body'],
+            "notify_url" => $mainArray['notifyUrl'],
+            "amount" => [
+                "total" => $mainArray['total_fee'],
+                "currency" => "CNY"
+            ],
             "time_expire" => date("YmdHis", time() + 1800),
-            "notify_url" => $mainArray['notify_url'],
-            "limit_pay" => "no_credit",
-            "trade_type" => $mainArray['trade_type']
         ];
-        $params = array_merge($params, $mainArray);
-        $params['sign'] = $this->makeSign($params);
-        $result = sendRequest($this->createUrl, "POST", ["body" => arrayToXml($params)], ["Content-Type" => "application/xml"]);
-        if ($result['status'] !== true || $result['message'] !== 'SUCCESS') throw new Exception("发送请求失败");//发送请求失败
-        $xmlResult = xmlToCollection($result['result'])->toArray();
-        if ($xmlResult['return_code'] === 'FAIL' || $xmlResult['return_code'] !== 'SUCCESS' || $xmlResult['return_msg'] !== 'OK') throw new Exception($xmlResult['return_msg']);//发起支付失败
-        return $xmlResult;
+        if ($mainArray['trade_type'] == "jsapi") $params['payer'] = ["openid" => $mainArray['openid']];
+        $result = getRequest($this->payOrderUrl . "/" . $mainArray['trade_type'], "POST", json_encode($params));
+//        if($result['status']!=true||$result['message']!=="")
     }
 
     private function microPay($mainArray)

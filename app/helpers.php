@@ -172,7 +172,6 @@ if(!function_exists('getRequest')){
             curl_setopt($curl, CURLOPT_POST, 1);
             curl_setopt($curl,CURLOPT_POSTFIELDS,$main);
         }
-        $data = curl_exec($curl);
-        return $data;
+        return curl_exec($curl);
     }
 }
