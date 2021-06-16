@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 class ChatConnection extends Model
 {
     use HasFactory;
-    protected $table="chatConnection";
-    protected $fillable=["roomId","source","fd","status"];
+
+    protected $table = "chatConnection";
+    protected $fillable = ["roomId", "source", "fd", "status"];
 }

@@ -15,5 +15,6 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     use HasFactory;
-    protected $table="productView";
+
+    protected $table = "productView";
 }

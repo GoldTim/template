@@ -15,5 +15,6 @@ use Illuminate\Database\Eloquent\Model;
 class ShopCoupon extends Model
 {
     use HasFactory;
-    protected $table="shopCoupon";
+
+    protected $table = "shopCoupon";
 }

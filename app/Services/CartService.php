@@ -78,7 +78,7 @@ class CartService extends BaseService
      * @throws FileNotFoundException
      * @throws Exception
      */
-    public function commitCart($data,$uId)
+    public function commitCart($data, $uId)
     {
         $this->checkView("userCouponView");
         $result = $productList = [];
@@ -107,7 +107,7 @@ class CartService extends BaseService
     }
 
 
-    private function AssCart($productList,$uId,$couponCode=null,$province=null,$city=null)
+    private function AssCart($productList, $uId, $couponCode = null, $province = null, $city = null)
     {
         $shipAmount = 0;
         foreach ($productList as $item) {
@@ -145,7 +145,7 @@ class CartService extends BaseService
                 unset($amount, $ship, $shipDetail, $cal);
             }
         }
-        $coupon = $this->AssCoupon($uId, collect($productList)->sum('tAmount'),$couponCode);
+        $coupon = $this->AssCoupon($uId, collect($productList)->sum('tAmount'), $couponCode);
         $list = [
             'coupon' => $coupon,
             'productList' => $productList,
@@ -157,7 +157,7 @@ class CartService extends BaseService
         return !empty($list) ? $list : [];
     }
 
-    private function AssCoupon($uId,$amount,$couponCode=null)
+    private function AssCoupon($uId, $amount, $couponCode = null)
     {
         $couponList = UserCoupon::where([
             'uId' => $uId,
@@ -184,7 +184,6 @@ class CartService extends BaseService
     }
 
 
-
     /**
      * 获取产品
      * @param $data
@@ -204,7 +203,7 @@ class CartService extends BaseService
 //            'img' => $product['skuImage'],
             'num' => $data['skuNum'],
             'amount' => $product['amount'],
-            "weight"=>intval($product['weight']),
+            "weight" => intval($product['weight']),
             'skuId' => "",
             'colorId' => ""
         ];

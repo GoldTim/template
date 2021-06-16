@@ -49,7 +49,7 @@ if (!function_exists('send_response')) {
 //        }
 
         header('Content-Type: application/json; charset=utf-8', true);
-        env('APP_ENV') == "production"? (!empty($code) ? Log::error($msg) : Log::info($msg)): Log::debug($msg);
+        env('APP_ENV') == "production" ? (!empty($code) ? Log::error($msg) : Log::info($msg)) : Log::debug($msg);
         echo json_encode($response);
         exit;
     }
@@ -65,7 +65,7 @@ if (!function_exists('is_mobile')) {
     {
         if (strstr($mobile, '+86')) $mobile = substr($mobile, 3);
         if (strstr($mobile, '+886') || strstr($mobile, '+852')) $mobile = substr($mobile, 4);
-        if(preg_match("/^1[34578]{1}\d{9}$/", $mobile) || preg_match("/^([9])\d{8}$/",$mobile) || preg_match("/^([2|3|5|6|9])\d{7}$/", $mobile)) return true;
+        if (preg_match("/^1[34578]{1}\d{9}$/", $mobile) || preg_match("/^([9])\d{8}$/", $mobile) || preg_match("/^([2|3|5|6|9])\d{7}$/", $mobile)) return true;
         return false;
     }
 }
@@ -130,7 +130,7 @@ if (!function_exists('xmlToCollection')) {
     {
         libxml_disable_entity_loader(true);
         //将xml数据转换为数组并再次转换为Laravel的Collection集合
-        return collect(json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true))->map(function($item){
+        return collect(json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true))->map(function ($item) {
             return trim($item);
         });
 //        return $list;
@@ -154,12 +154,12 @@ if (!function_exists('arrayToXml')) {
                 $requestXml .= "<" . $key . "><![CDATA[" . $val . "]]></" . $key . ">";
             }
         }
-        return "<xml>".$requestXml."</xml>";
+        return "<xml>" . $requestXml . "</xml>";
     }
 }
 
-if(!function_exists('getRequest')){
-    function getRequest($url,$method="get",$main=[],$header=[])
+if (!function_exists('getRequest')) {
+    function getRequest($url, $method = "get", $main = [], $header = [])
     {
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
@@ -168,10 +168,12 @@ if(!function_exists('getRequest')){
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-        if($method=="POST") {
+        if ($method == "POST") {
             curl_setopt($curl, CURLOPT_POST, 1);
-            curl_setopt($curl,CURLOPT_POSTFIELDS,$main);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $main);
         }
+        if (!empty($header))
+            curl_setopt($curl, CURLOPT_HEADER, $header);
         return curl_exec($curl);
     }
 }

@@ -13,7 +13,7 @@ use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
 class ProductService extends BaseService
 {
-    protected $fileType="json";
+    protected $fileType = "json";
     protected $disk = "product";
 //    protected $product = [
 //        "id" => "",
@@ -56,7 +56,7 @@ class ProductService extends BaseService
      * @return array
      * @throws Exception
      */
-    public function changeProduct($uId,$data)
+    public function changeProduct($uId, $data)
     {
         $shop = Shop::where('uId', $uId)->first();
         if (!$product = Product::firstOrCreate(['stockId' => $data['stockId']], [
@@ -134,7 +134,7 @@ class ProductService extends BaseService
     public function getProduct($stockId)
     {
         $file = $this->setFile($stockId, $this->fileType);
-        if (!$product = $this->storage($this->disk, $file,"get")) {
+        if (!$product = $this->storage($this->disk, $file, "get")) {
             if (!$product = Product::where('stockId', $stockId)->first()) throw new Exception("获取商品详情失败,该商品可能已下架");
             $sku = $color = [];
             foreach (ProductSku::where('stockId', $product->stockId)->get(['skuId', 'colorId', 'skuAmount', 'skuNum', 'skuImage']) as $item) {
@@ -144,8 +144,8 @@ class ProductService extends BaseService
             $product = collect(array_merge($product->toArray(), ['skuList' => $sku, 'colorList' => $color]))->toJson();
             $this->storage($this->disk, $this->setFile($stockId, $this->fileType), 'change', $product);
         }
-        $product= json_decode($product, true);
-        if(config('params.productStatus.'.$product['status'])=='下架') throw new Exception("商品已下架");
+        $product = json_decode($product, true);
+        if (config('params.productStatus.' . $product['status']) == '下架') throw new Exception("商品已下架");
         return $product;
     }
 

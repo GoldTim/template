@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 class ProductSku extends Model
 {
     use HasFactory;
-    protected $table='productSku';
-    protected $fillable=['stockId','skuId','colorId','skuAmount','skuNum','skuImage'];
+
+    protected $table = 'productSku';
+    protected $fillable = ['stockId', 'skuId', 'colorId', 'skuAmount', 'skuNum', 'skuImage'];
 }

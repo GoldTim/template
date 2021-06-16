@@ -8,6 +8,7 @@ use App\Services\ProductService;
 use Exception;
 
 use Illuminate\Support\Facades\Request;
+
 class ProductController extends Controller
 {
     protected $service;
@@ -39,7 +40,7 @@ class ProductController extends Controller
     public function change()
     {
         try {
-            $result = $this->service->changeProduct(null,$this->getData('data'));
+            $result = $this->service->changeProduct(null, $this->getData('data'));
             send_response($result);
         } catch (Exception$exception) {
             send_response([], $exception->getCode(), $exception->getMessage());

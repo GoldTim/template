@@ -20,9 +20,10 @@ use Illuminate\Database\Eloquent\Model;
 class ShipInfo extends Model
 {
     use HasFactory;
-    protected $table='shopShip';
-    protected $fillable=['name','address','sendTime','type','chargingType','isFree'];
-    protected $casts=[
-        'address'=>'array'
+
+    protected $table = 'shopShip';
+    protected $fillable = ['name', 'address', 'sendTime', 'type', 'chargingType', 'isFree'];
+    protected $casts = [
+        'address' => 'array'
     ];
 }

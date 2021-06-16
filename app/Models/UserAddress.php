@@ -28,7 +28,8 @@ use Illuminate\Database\Eloquent\Model;
 class UserAddress extends Model
 {
     use HasFactory;
-    protected $table="userAddress";
+
+    protected $table = "userAddress";
     protected $fillable = [
         "uId",
         "lastName",
@@ -42,6 +43,6 @@ class UserAddress extends Model
         "company",
         "addressLine1",
         "addressLine2",
-        "postCode","status","isDefault"
+        "postCode", "status", "isDefault"
     ];
 }

@@ -1,33 +1,39 @@
 <?php
+
 namespace App\Helpers;
+
 use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use ReflectionException;
 use ReflectionMethod;
 
-class WeChat{
-    protected $appId="wx94cbfb86cef8ee5b";
-    protected $secret="955517946b3038975e8708350170c087";
-    protected $mchId="1520401631";
+class WeChat
+{
+    protected $appId = "wx94cbfb86cef8ee5b";
+    protected $secret = "955517946b3038975e8708350170c087";
+    protected $mchId = "1520401631";
     protected $charset = "utf-8";
     protected $getAccessTokenUrl = "https://api.weixin.qq.com/sns/oauth2/access_token";
     protected $getOpenIdUrl = "https://api.weixin.qq.com/sns/jscode2session";
-    protected $refundUrl='https://api.mch.weixin.qq.com/secapi/pay/refund';
+    protected $refundUrl = 'https://api.mch.weixin.qq.com/secapi/pay/refund';
     protected $enquiryUrl = "https://api.mch.weixin.qq.com/pay/orderquery";
-    protected $createUrl="https://api.mch.weixin.qq.com/pay/unifiedorder";
+    protected $createUrl = "https://api.mch.weixin.qq.com/pay/unifiedorder";
     protected $microPayUrl = "https://api.mch.weixin.qq.com/pay/micropay";
 
     protected $payOrderUrl = "https://api.mch.weixin.qq.com/v3/pay/transactions";
 
     protected $methodArray = [
-        "pay","view","refund","checkOrder","microPay"
+        "pay", "view", "refund", "checkOrder", "microPay"
     ];
 
-    /*
-     *
+    /**
+     * WeChat constructor.
+     * @param $typeName
+     * @throws Exception
      */
     public function __construct($typeName)
     {
@@ -52,11 +58,12 @@ class WeChat{
      * @param $typeName
      * @throws Exception
      */
-    private function getWeChatInfo($typeName){
+    private function getWeChatInfo($typeName)
+    {
         if (!Schema::hasTable("system")) throw new Exception("获取系统微信信息失败");
         if (!Schema::hasColumn("system", "weChatInfo")) throw new Exception("获取系统微信信息失败");
         if (!$info = DB::table("system")->select("weChatInfo")->first()) throw new Exception("获取系统微信信息失败");
-        $weChatInfo = json_decode($info->weChatInfo,true);
+        $weChatInfo = json_decode($info->weChatInfo, true);
         $this->mchId = $weChatInfo['mchId'];
         $this->appId = $weChatInfo['appId'];
         $this->secret = $weChatInfo['secret'];
@@ -109,6 +116,12 @@ class WeChat{
 //        if($result['status']!=true||$result['message']!=="")
     }
 
+    /**
+     * 扫码支付
+     * @param $mainArray
+     * @return array
+     * @throws GuzzleException
+     */
     private function microPay($mainArray)
     {
         $params = [
@@ -121,14 +134,14 @@ class WeChat{
             "time_start" => date("YmdHis"),
             "time_expire" => date("YmdHis", time() + 1800),
             "limit_pay" => "no_credit",
-            "attach"=>$mainArray['body']
+            "attach" => $mainArray['body']
         ];
         $params = array_merge($params, $mainArray);
         $params['sign'] = $this->makeSign($params);
         $client = new Client();
-        $result = $client->post($this->microPayUrl,[
-            "headers"=>["Content-Type"=>"application/xml"],
-            "body"=>arrayToXml($params)
+        $result = $client->post($this->microPayUrl, [
+            "headers" => ["Content-Type" => "application/xml"],
+            "body" => arrayToXml($params)
         ]);
 //        $result = xmlToCollection($result->getBody()->getContents())->toArray();
         $result = xmlToCollection($result->getBody()->getContents())->toArray();
@@ -157,6 +170,11 @@ class WeChat{
         return $result;
     }
 
+    /**
+     * 检查订单
+     * @param $mainArray
+     * @return bool
+     */
     private function View($mainArray)
     {
         $params = [
@@ -169,20 +187,20 @@ class WeChat{
         $result = getRequest($this->enquiryUrl, "POST", [
             "body" => arrayToXml($params)
         ], ["headers" => ["Content-Type" => "application/xml"]]);
-        dd($result);
-        return $result['trade_state'] !== "SUCCESS" ? false : true;
+//        dd($result);
+        return $result['trade_state'] === "SUCCESS";
     }
 
     private function Reverse($orderSn)
     {
         $params = [
-            "appid"=>$this->appId,
-            "mch_id"=>$this->mchId,
-            "out_trade_no"=>$orderSn,
-            "nonce_str"=>md5("Reverse".time()),
+            "appid" => $this->appId,
+            "mch_id" => $this->mchId,
+            "out_trade_no" => $orderSn,
+            "nonce_str" => md5("Reverse" . time()),
         ];
         $params['sign'] = $this->makeSign($params);
-        $result = getRequest($this->reverseUrl,"POST",["body"=>arrayToXml($params)],["headers"=>["Content-Type"=>"application/xml"]]);
+        $result = getRequest($this->reverseUrl, "POST", ["body" => arrayToXml($params)], ["headers" => ["Content-Type" => "application/xml"]]);
     }
 
     private function Refund($mainArray)
@@ -191,20 +209,20 @@ class WeChat{
             'appid' => $this->appId,
             'mch_id' => $this->mchId,
             'nonce_str' => md5("Refund" . time()),
-            'out_trade_no'=>$mainArray['out_trade_no'],
-            'out_refund_no'=>$mainArray['out_refund_no'],
-            'total_fee'=>$mainArray['total_fee'],
-            'refund_fee'=>$mainArray['refund_fee']
+            'out_trade_no' => $mainArray['out_trade_no'],
+            'out_refund_no' => $mainArray['out_refund_no'],
+            'total_fee' => $mainArray['total_fee'],
+            'refund_fee' => $mainArray['refund_fee']
         ];
         $params['sign'] = $this->makeSign($params);
-        return sendRequest($this->refundUrl,"POST",[
-            "body"=>arrayToXml($params),
-            "cert"=>[
+        return sendRequest($this->refundUrl, "POST", [
+            "body" => arrayToXml($params),
+            "cert" => [
                 $mainArray['cert'],
                 $mainArray['key']
-            ],[]
-        ],[
-            "Content-Type"=>"application/xml"
+            ], []
+        ], [
+            "Content-Type" => "application/xml"
         ]);
     }
 
@@ -219,7 +237,8 @@ class WeChat{
      * @return mixed
      * @throws Exception
      */
-    private function getOpenId($mainArray){
+    private function getOpenId($mainArray)
+    {
         $params = [
             'appid' => $this->appId,
             'secret' => $this->secret,
@@ -232,7 +251,7 @@ class WeChat{
             $url = $this->getOpenIdUrl;
             $params['js_code'] = $mainArray['code'];
         }
-        $result = sendRequest($url . '?' . $this->urlEncode($params),"GET");
+        $result = sendRequest($url . '?' . $this->urlEncode($params), "GET");
         if (!$result['status'] || $result['message'] === 'ERROR') throw new Exception("请求失败");
         $result = $result['result'];
         if (empty($result['openid'])) throw new Exception("获取OpenId失败");
@@ -241,23 +260,24 @@ class WeChat{
 
     /**
      * 获取全局Token
-     * @param $mainArray
      * @return mixed
      * @throws Exception
      */
-    private function getAccessToken(){
+    private function getAccessToken()
+    {
         $params = [
             'appid' => $this->appId,
             'secret' => $this->secret,
             'grant_type' => 'client_credential'
         ];
-        $result = sendRequest($this->getAccessTokenUrl . '?' . $this->urlEncode($params),"GET");
+        $result = sendRequest($this->getAccessTokenUrl . '?' . $this->urlEncode($params), "GET");
         if (!$result['status'] || $result['message'] === 'ERROR') throw new Exception("请求失败");
         if (empty($result['result']['openid'])) throw new Exception("获取全局AccessToken失败");
         return $result['result']['access_token'];
     }
 
-    private function decryptData($mainArray){
+    private function decryptData($mainArray)
+    {
         if (strlen($mainArray['sessionKey']) != 24) return false;
         $aesKey = base64_decode($mainArray['sessionKey']);
         if (strlen($mainArray['iv']) != 24) return false;
@@ -268,7 +288,8 @@ class WeChat{
         return $dataObj === NULL ? false : ($dataObj->watermark->appid != $this->appId ? false : json_decode($result));
     }
 
-    public function verification($params){
+    public function verification($params)
+    {
         $sign = $this->makeSign($params);
         if (!$sign || $sign !== strtoupper($params['sign'])) return "sign error";
         if ($this->mchId != $params['mch_id']) return "mch_id error";
@@ -277,7 +298,8 @@ class WeChat{
     }
 
 
-    private function urlEncode($params){
+    private function urlEncode($params)
+    {
         ksort($params);
         $str = "";
         $i = 0;
@@ -293,22 +315,25 @@ class WeChat{
         return $str;
     }
 
-    public function makeSign($params){
+    public function makeSign($params)
+    {
         ksort($params);
         $string = "";
         foreach ($params as $p => $param)
-            if ($p != "sign" && $param !=  "" && !is_array($param)) $string .= $p . "=" . $param . "&";
+            if ($p != "sign" && $param != "" && !is_array($param)) $string .= $p . "=" . $param . "&";
         return strtoupper(md5(trim($string, "&") . "&key=" . $this->secret));
     }
 
-    private function checkEmpty($value){
+    private function checkEmpty($value)
+    {
         if (!isset($value)) return true;
         if ($value === null) return true;
         if (trim($value) === "") return true;
         return false;
     }
 
-    private function charAct($data,$target){
+    private function charAct($data, $target)
+    {
         if (empty($data)) return $data;
         if (strcasecmp($this->charset, $target) != 0) $data = mb_convert_encoding($data, $target, $this->charset);
         return $data;

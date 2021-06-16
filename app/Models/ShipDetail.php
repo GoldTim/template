@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 class ShipDetail extends Model
 {
     use HasFactory;
-    protected $table="shipDetail";
-    protected $fillable=["shipId","type","province","city","dNum","dAmount","cNum","renew"];
+
+    protected $table = "shipDetail";
+    protected $fillable = ["shipId", "type", "province", "city", "dNum", "dAmount", "cNum", "renew"];
 }

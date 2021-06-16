@@ -74,7 +74,7 @@ class WebSocketService implements WebSocketHandlerInterface
             "type" => $data['type'],
             "source" => $data['source'],
             "message" => $data['message'],
-            "status"=>array_search('是',config('params.status'))
+            "status" => array_search('是', config('params.status'))
         ]);
     }
 

@@ -1,21 +1,24 @@
 <?php
+
 namespace App\Services;
+
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
-class BaseService{
+class BaseService
+{
     protected $list = [
-        'page'=>0,
-        'per_page'=>0,
-        'total'=>0,
-        'total_page'=>0,
-        'list'=>[]
+        'page' => 0,
+        'per_page' => 0,
+        'total' => 0,
+        'total_page' => 0,
+        'list' => []
     ];
 
-    protected function setFile($name,$fileType)
+    protected function setFile($name, $fileType)
     {
-        return $name.".".$fileType;
+        return $name . "." . $fileType;
     }
 
     /**
@@ -27,7 +30,7 @@ class BaseService{
      * @return array|bool|string
      * @throws FileNotFoundException
      */
-    protected function storage(string $disk, string $name, string $type, $data=null)
+    protected function storage(string $disk, string $name, string $type, $data = null)
     {
         $storage = Storage::disk($disk);
         $method = [
@@ -46,9 +49,9 @@ class BaseService{
      * @return array
      * @throws FileNotFoundException
      */
-    protected function getAddress($province,$city)
+    protected function getAddress($province, $city)
     {
-        $file = $this->storage("json","address.json","get");
+        $file = $this->storage("json", "address.json", "get");
         $data = json_decode($file);
         $cityResult = [];
         if ($provinceResult = collect($data)->where('name', $province)->values()->first()) {
@@ -60,8 +63,8 @@ class BaseService{
 
     public function checkView($name)
     {
-        $sql = "select table_name from information_schema.tables where table_schema='".env('DB_DATABASE')."' and table_name='{$name}'";
-        return DB::select($sql)?true:$this->createView($name);
+        $sql = "select table_name from information_schema.tables where table_schema='" . env('DB_DATABASE') . "' and table_name='{$name}'";
+        return DB::select($sql) ? true : $this->createView($name);
     }
 
     public function createView($name)
@@ -70,8 +73,8 @@ class BaseService{
 
         $sqlArray = [
             "userCouponView" => "`userCoupon`.`id`,`couponId`,`uId`,`status`,`couponName`,`type`,`amount`,`dNum`,`startDate`,`endDate`  from userCoupon join shopCoupon on shopCoupon.id = userCoupon.couponId",
-            "skuView"=>"",
-            "productView"=>"",
+            "skuView" => "",
+            "productView" => "",
         ];
         if ($sqlArray[$name]) return DB::statement($sql . $sqlArray[$name]);
         return false;

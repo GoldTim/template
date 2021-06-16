@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 class ChatMessage extends Model
 {
     use HasFactory;
-    protected $table="chatMessage";
-    protected $fillable=["type","source","message","status","roomId"];
+
+    protected $table = "chatMessage";
+    protected $fillable = ["type", "source", "message", "status", "roomId"];
 }

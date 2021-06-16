@@ -34,7 +34,7 @@ class OrderService extends BaseService
      * @throws FileNotFoundException
      * @throws Exception
      */
-    public function createOrder($data,$uId)
+    public function createOrder($data, $uId)
     {
         $orderList = [];
         if (!$userAddress = UserAddress::find($data['addressId'])) throw new Exception("获取用户地址失败");
@@ -116,7 +116,7 @@ class OrderService extends BaseService
                     "disPoint" => isset($item['point']) ? $item['point'] : 0,
                     "couponCode" => $item['coupon'],
                     "orderType" => 1,
-                    "orderRemark" => isset($item['orderRemark'])?$item['orderRemark']:""
+                    "orderRemark" => isset($item['orderRemark']) ? $item['orderRemark'] : ""
                 ],
                 "detail" => $productList
             ];
@@ -301,10 +301,10 @@ class OrderService extends BaseService
      * 订单售后
      * @param $uId
      * @param $data
-     * @throws Exception
      * @return array
+     * @throws Exception
      */
-    public function afterOrder($uId,$data)
+    public function afterOrder($uId, $data)
     {
         $data = [
             "orderSn" => "",
@@ -341,7 +341,7 @@ class OrderService extends BaseService
      * @param $uId
      * @param $data
      * @throws Exception
-//     * @return array
+     * //     * @return array
      */
     public function refundOrder($uId, $data)
     {
@@ -377,7 +377,7 @@ class OrderService extends BaseService
      * @return array
      * @throws Exception
      */
-    public function confirmOrder($uId,$orderSn)
+    public function confirmOrder($uId, $orderSn)
     {
         $order = new OrderHelper();
         if (!$order->confirm([

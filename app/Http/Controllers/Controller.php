@@ -11,6 +11,7 @@ use function request;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+
     protected $_requestData = [];
 
     protected $code = 10000;
@@ -56,7 +57,6 @@ class Controller extends BaseController
     }
 
 
-
     protected function getData($key = '', $optional = false, $default = '')
     {
         if ($key !== null && empty($key))
@@ -72,7 +72,7 @@ class Controller extends BaseController
     }
 
 
-
-    public function saveLog($content,$path,$level){
+    public function saveLog($content, $path, $level)
+    {
     }
 }

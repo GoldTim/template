@@ -22,7 +22,7 @@ class CartController extends Controller
 
     public function __destruct()
     {
-        $this->service=null;
+        $this->service = null;
     }
 
     public function getList()
@@ -54,7 +54,7 @@ class CartController extends Controller
     public function commitCart()
     {
         try {
-            $result = $this->service->commitCart( $this->getData('data'),1);
+            $result = $this->service->commitCart($this->getData('data'), 1);
             send_response($result);
         } catch (Exception $exception) {
             send_response([], $exception->getCode(), $exception->getMessage());

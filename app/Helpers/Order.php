@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Helpers;
+
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -47,8 +49,8 @@ class Order
     /**
      * 获取订单详情
      * @param $data
-     * @throws Exception
      * @return array
+     * @throws Exception
      */
     public function detailOrder($data)
     {
@@ -75,7 +77,7 @@ class Order
     public function confirm($data)
     {
         $order = $this->setOrder($data);
-        return $this->updateOrderStatus($order,"已完成");
+        return $this->updateOrderStatus($order, "已完成");
     }
 
     public function Refund($data)
@@ -230,7 +232,7 @@ class Order
             ];
             $result = json_decode(AliPay::Implement("pay", $params), true)['alipay_trade_pay_response'];
         }
-        if(!$this->checkOrder(['paySn' => $data['orderSn']])) throw new Exception("");//轮询支付
+        if (!$this->checkOrder(['paySn' => $data['orderSn']])) throw new Exception("");//轮询支付
     }
 
     /**

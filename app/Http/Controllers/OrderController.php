@@ -29,7 +29,7 @@ class OrderController extends Controller
         DB::beginTransaction();
         try {
             $data = file_get_contents("php://input");
-            Log::channel("weChat")->info("回调开始",[]);
+            Log::channel("weChat")->info("回调开始", []);
             $result = $this->service->notifyWeChat($data);
             Log::channel("weChat")->info("回调成功");
             DB::commit();
@@ -49,7 +49,7 @@ class OrderController extends Controller
     {
         DB::beginTransaction();
         try {
-            $data = !empty(file_get_contents("php://input"))?file_get_contents("php://input"):$_GET;
+            $data = !empty(file_get_contents("php://input")) ? file_get_contents("php://input") : $_GET;
             Log::channel("aliPay")->info("回调开始", []);
             $result = $this->service->notifyAliPay($data);
             Log::channel("aliPay")->info("回调成功");
@@ -86,13 +86,13 @@ class OrderController extends Controller
     public function checkOrder()
     {
         DB::beginTransaction();
-        try{
-            $result = $this->service->checkOrder(auth('api')->id(),request('orderSn'));
+        try {
+            $result = $this->service->checkOrder(auth('api')->id(), request('orderSn'));
             DB::commit();
             send_response($result);
-        }catch (Exception$exception){
+        } catch (Exception$exception) {
             DB::rollBack();
-            send_response([],$exception->getCode(),$exception->getMessage());
+            send_response([], $exception->getCode(), $exception->getMessage());
         }
     }
 
@@ -119,7 +119,7 @@ class OrderController extends Controller
     public function detailOrder()
     {
         try {
-            $result = $this->service->detailOrder(auth('api')->id(),request('orderSn'));
+            $result = $this->service->detailOrder(auth('api')->id(), request('orderSn'));
             send_response($result);
         } catch (Exception$exception) {
             send_response([], $exception->getCode(), $exception->getMessage());
@@ -143,15 +143,16 @@ class OrderController extends Controller
      * 确认订单
      * @throws Throwable
      */
-    public function confirmOrder(){
+    public function confirmOrder()
+    {
         DB::beginTransaction();
-        try{
+        try {
             $result = $this->service->co();
             DB::commit();
             send_response($result);
-        }catch (Exception$exception){
+        } catch (Exception$exception) {
             DB::rollBack();
-            send_response([],$exception->getCode(),$exception->getMessage());
+            send_response([], $exception->getCode(), $exception->getMessage());
         }
     }
 
@@ -163,7 +164,7 @@ class OrderController extends Controller
     {
         DB::beginTransaction();
         try {
-            $result = $this->service->payOrder(1,request()->all());
+            $result = $this->service->payOrder(1, request()->all());
             DB::commit();
             send_response($result);
         } catch (Exception $exception) {

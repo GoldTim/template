@@ -14,7 +14,8 @@ use Illuminate\Database\Eloquent\Model;
 class UserCoupon extends Model
 {
     use HasFactory;
-    protected $table="userCouponView";
+
+    protected $table = "userCouponView";
 
     public function add($data)
     {

@@ -13,8 +13,9 @@ use Illuminate\Database\Eloquent\Model;
 class OrderMaster extends Model
 {
     use HasFactory;
-    protected $table="orderMaster";
-    protected $fillable=[""];
+
+    protected $table = "orderMaster";
+    protected $fillable = [""];
 
     public function setOrderMsnAttribute($value)
     {

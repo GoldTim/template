@@ -5,14 +5,13 @@ namespace App\Helpers;
 
 
 use Illuminate\Support\Facades\Storage;
-use phpDocumentor\Reflection\File;
-use phpDocumentor\Reflection\Types\This;
 
 class Cart
 {
     private $disk = "cart";
     private $file;
     private $fileName = "";
+
     public function __construct($uId)
     {
         $this->fileName = $uId . ".json";
@@ -34,6 +33,6 @@ class Cart
     public function setFile()
     {
         $this->file = Storage::disk($this->disk)->exists($this->fileName)
-            ? json_decode(Storage::disk($this->disk)->get($this->fileName),true) : [];
+            ? json_decode(Storage::disk($this->disk)->get($this->fileName), true) : [];
     }
 }
